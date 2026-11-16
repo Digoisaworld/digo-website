@@ -1,0 +1,79 @@
+name: Build and deploy DIGO website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'digo-site-source.zip'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source archive
+        uses: actions/checkout@v4
+
+      - name: Extract website source
+        run: |
+          mkdir -p extracted
+          unzip -q digo-site-source.zip -d extracted
+          echo "Extracted files:"
+          find extracted -maxdepth 3 -type f | head -80
+          PACKAGE_JSON="$(find extracted -name package.json -not -path '*/node_modules/*' -print -quit)"
+          if [ -z "$PACKAGE_JSON" ]; then
+            echo "::error::No package.json found in digo-site-source.zip"
+            exit 1
+          fi
+          PROJECT_DIR="$(dirname "$PACKAGE_JSON")"
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache-dependency-path: ${{ env.PROJECT_DIR }}/package-lock.json
+
+      - name: Install dependencies and build
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          npm run build
+
+      - name: Prepare Pages artifact
+        run: |
+          if [ -d "$PROJECT_DIR/dist" ]; then OUT="$PROJECT_DIR/dist";
+          elif [ -d "$PROJECT_DIR/build" ]; then OUT="$PROJECT_DIR/build";
+          else
+            echo "::error::Build succeeded but no dist/ or build/ output directory exists."
+            exit 1
+          fi
+          touch "$OUT/.nojekyll"
+          mkdir -p _site
+          cp -a "$OUT"/. _site/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
