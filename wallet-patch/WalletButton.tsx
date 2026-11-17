@@ -71,12 +71,14 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
     setError('')
 
     const phantom = wallets.find((item) => item.adapter.name === 'Phantom')
-    const phantomUnavailable = !phantom || phantom.adapter.readyState === WalletReadyState.NotDetected
+    const injected = typeof window !== 'undefined' && Boolean(
+      (window as Window & { phantom?: { solana?: { isPhantom?: boolean } }; solana?: { isPhantom?: boolean } }).phantom?.solana?.isPhantom ||
+      (window as Window & { solana?: { isPhantom?: boolean } }).solana?.isPhantom,
+    )
 
-    // Phantom mobile does not inject a provider into external browsers.
-    // Use the original tap to open this exact page inside Phantom, without an
-    // intermediate error panel or a second "Open Phantom" button.
-    if (isMobileBrowser && phantomUnavailable) {
+    // On mobile, hand off to Phantom unless its provider is actually injected
+    // in this browser. Do not rely on the adapter's detection state alone.
+    if (isMobileBrowser && !injected) {
       window.location.assign(phantomBrowseUrl)
       return
     }
