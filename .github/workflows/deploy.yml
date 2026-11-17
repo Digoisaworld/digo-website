@@ -29,8 +29,6 @@ jobs:
         run: |
           mkdir -p extracted
           unzip -q digo-site-source.zip -d extracted
-          echo "Extracted files:"
-          find extracted -maxdepth 3 -type f | head -80
           PACKAGE_JSON="$(find extracted -name package.json -not -path '*/node_modules/*' -print -quit)"
           if [ -z "$PACKAGE_JSON" ]; then
             echo "::error::No package.json found in digo-site-source.zip"
@@ -39,26 +37,22 @@ jobs:
           PROJECT_DIR="$(dirname "$PACKAGE_JSON")"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
-      - name: Apply reviewed wallet integration patch
+      - name: Apply wallet and live swap integration patches
         run: |
           cp wallet-patch/WalletButton.tsx "$PROJECT_DIR/src/components/WalletButton.tsx"
+          cp wallet-patch/SwapPanel.tsx "$PROJECT_DIR/src/components/SwapPanel.tsx"
           cat wallet-patch/wallet-button.css >> "$PROJECT_DIR/src/styles/index.css"
-          echo "Applied Phantom mobile-browser handoff patch."
+          cat wallet-patch/swap-panel.css >> "$PROJECT_DIR/src/styles/index.css"
+          echo "Applied Phantom handoff and Jupiter Swap API integration."
 
-      - name: Package unpacked source for inspection
+      - name: Package patched source for inspection
         run: |
-          tar -czf digo-source-inspection.tar.gz \
-            --exclude='./.git' \
-            --exclude='./.github' \
-            -C "$PROJECT_DIR" .
-          ls -lh digo-source-inspection.tar.gz
-
+          tar -czf digo-source-inspection.tar.gz -C "$PROJECT_DIR" .
       - name: Upload source inspection artifact
         uses: actions/upload-artifact@v4
         with:
           name: digo-source-inspection
           path: digo-source-inspection.tar.gz
-          if-no-files-found: error
           retention-days: 2
 
       - name: Set up Node
