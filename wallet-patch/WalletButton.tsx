@@ -29,7 +29,7 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
   // The Chrome handoff carries a one-shot flag. Once Phantom's in-app browser
   // loads the page and injects its provider, request the wallet connection once.
   useEffect(() => {
-    if (typeof window === 'undefined' || !isMobileBrowser || !isPhantomInApp) return
+    if (typeof window === 'undefined' || !isMobileBrowser) return
     const url = new URL(window.location.href)
     if (url.searchParams.get(CONNECT_PARAM) !== '1' || connected || connecting) return
     const phantom = wallets.find((item) => item.adapter.name === 'Phantom')
@@ -40,7 +40,7 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
       return
     }
     setPendingWallet(true)
-  }, [connected, connecting, isMobileBrowser, isPhantomInApp, select, wallet, wallets])
+  }, [connected, connecting, isMobileBrowser, select, wallet, wallets])
 
   useEffect(() => {
     if (!pendingWallet || !wallet || connected || connecting) return
@@ -80,7 +80,7 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
     // Phantom mobile does not inject a provider into external browsers.
     // Use the original tap to open this exact page inside Phantom, without an
     // intermediate error panel or a second "Open Phantom" button.
-    if (isMobileBrowser && !isPhantomInApp && phantomUnavailable) {
+    if (isMobileBrowser && phantomUnavailable) {
       window.location.assign(phantomBrowseUrl)
       return
     }
