@@ -1,0 +1,9 @@
+
+/* Live Jupiter swap controls */
+.swap-actions { display: grid; gap: 9px; }
+.swap-feedback { margin-top: 12px; padding: 11px 12px; border-radius: 10px; font-size: 11px; line-height: 1.55; overflow-wrap: anywhere; }
+.swap-error { color: #ffb0a5; background: rgba(105,35,29,.28); border: 1px solid rgba(255,120,100,.25); }
+.swap-success { color: #b7ff3c; background: rgba(80,130,35,.13); border: 1px solid rgba(183,255,60,.25); }
+.swap-success a { color: var(--mint); text-decoration: underline; text-underline-offset: 3px; }
+.swap-spinner { animation: swap-spin 1s linear infinite; }
+@keyframes swap-spin { to { transform: rotate(360deg); } }
