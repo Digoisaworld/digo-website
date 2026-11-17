@@ -31,7 +31,7 @@ type ExecuteResult = {
 const decode = (s: string) => Uint8Array.from(atob(s), c => c.charCodeAt(0))
 const encode = (a: Uint8Array) => { let s = ''; a.forEach(b => { s += String.fromCharCode(b) }); return btoa(s) }
 function solToLamports(s: string): bigint | null {
-  if (!/^\\d+(\\.\\d{0,9})?$/.test(s)) return null
+  if (!/^\d+(\.\d{0,9})?$/.test(s)) return null
   const [w, f = ''] = s.split('.')
   return BigInt(w) * LAMPORTS + BigInt((f + '000000000').slice(0, 9))
 }
@@ -119,7 +119,7 @@ export function SwapPanel() {
     <div className="swap-card-topline"><div><span className="eyebrow">BUY DIGO</span><h3>Own the moment.</h3></div><div className="prototype-badge"><CircleAlert size={14} /> Live route</div></div>
     <p className="swap-note">Live indicative pricing from Jupiter. The displayed amount is not an executable offer unless a transaction is available.</p>
     <div className="asset-field"><div className="field-label"><span>You send</span><span className="muted">Enter SOL amount</span></div>
-      <div className="asset-row"><input value={amount} onChange={e => { setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/\\.(?=.*\\.)/g, '')); setOrder(null); setError(''); setSignature('') }} inputMode="decimal" placeholder="0.00" aria-label="SOL amount" /><div className="asset-select"><span className="asset-icon sol-icon">S</span> SOL</div></div>
+      <div className="asset-row"><input value={amount} onChange={e => { setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/\.(?=.*\.)/g, '')); setOrder(null); setError(''); setSignature('') }} inputMode="decimal" placeholder="0.00" aria-label="SOL amount" /><div className="asset-select"><span className="asset-icon sol-icon">S</span> SOL</div></div>
     </div>
     <div className="swap-arrow"><ArrowDown size={17} /></div>
     <div className="asset-field output-field"><div className="field-label"><span>You receive</span><span className="muted">{order ? (executable ? 'Executable quote' : 'Indicative only · not executable') : 'Quote required'}</span></div>
