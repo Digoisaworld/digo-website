@@ -20,6 +20,9 @@ type Order = {
   errorCode?: number
   errorMessage?: string
   lastValidBlockHeight?: number
+  priceImpactPct?: string
+  feeBps?: number
+  feeMint?: string
 }
 type ExecuteResult = {
   status?: 'Success' | 'Failed'
@@ -43,6 +46,12 @@ function digoAmount(raw?: string) {
     const fraction = (n % DIGO_UNITS).toString().padStart(8, '0').replace(/0+$/, '')
     return fraction ? whole + '.' + fraction : whole
   } catch { return '—' }
+}
+function formatPriceImpact(raw?: string) {
+  if (raw === undefined || raw === null || raw.trim() === '') return 'Not supplied by Jupiter'
+  const value = Number(raw)
+  if (!Number.isFinite(value)) return 'Unavailable'
+  return (value * 100).toFixed(3) + '%'
 }
 function impliedRate(order: Order | null) {
   if (!order?.inAmount || !order.outAmount) return '—'
@@ -81,8 +90,10 @@ export function SwapPanel() {
         throw new Error(data.errorMessage || 'Jupiter did not return a valid output amount for this pair and size.')
       setOrder(data)
       if (!data.transaction) {
-        if (data.router === 'dflow' && data.errorCode === 1) {
-          setError('Jupiter found an indicative price, but your wallet SOL balance is insufficient for this order. Reduce the SOL amount or add SOL. This quote cannot be executed.')
+        if (data.errorCode === 1) {
+          setError('Jupiter returned an indicative price, but the wallet SOL balance is insufficient for this order. Reduce the SOL amount or add SOL. This quote cannot be executed.')
+        } else if (data.errorCode === 2) {
+          setError('Jupiter returned an indicative price, but there is not enough SOL to cover network fees. Keep additional SOL in the wallet. This quote cannot be executed.')
         } else {
           const detail = data.errorMessage || 'A price quote exists, but Jupiter could not build an executable transaction for this route.'
           setError(data.errorCode !== undefined ? detail + ' (router: ' + (data.router || 'unknown') + ', code: ' + data.errorCode + ')' : detail)
@@ -127,7 +138,7 @@ export function SwapPanel() {
     </div>
     <div className="swap-details">
       <div><span>Indicative rate</span><strong>{order ? impliedRate(order) + ' DIGO / SOL' : 'Unavailable'}</strong></div>
-      <div><span>Price impact</span><strong>Not supplied by quote API</strong></div>
+      <div><span>Price impact</span><strong>{order ? formatPriceImpact(order.priceImpactPct) : 'Unavailable'}</strong></div>
       <div><span>Slippage</span><strong>{order ? 'Jupiter RTSE' : 'Set on live route'}</strong></div>
       <div><span>Network fee</span><strong>{executable ? 'Review in Phantom' : 'Not available'}</strong></div>
     </div>
