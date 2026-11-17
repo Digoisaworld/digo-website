@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -37,6 +37,23 @@ jobs:
           fi
           PROJECT_DIR="$(dirname "$PACKAGE_JSON")"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+      - name: Publish unpacked source to inspection branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          BRANCH="automation/source-unpacked-20261117-$SHORT_SHA"
+          TMP_DIR="$(mktemp -d)"
+          cp -a "$PROJECT_DIR"/. "$TMP_DIR"/
+          git -C "$TMP_DIR" init -b "$BRANCH"
+          git -C "$TMP_DIR" config user.name "github-actions[bot]"
+          git -C "$TMP_DIR" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "$TMP_DIR" add -A
+          git -C "$TMP_DIR" commit -m "chore: expose unpacked website source for wallet integration fix"
+          git -C "$TMP_DIR" remote add origin "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git"
+          git -C "$TMP_DIR" push origin "HEAD:refs/heads/$BRANCH"
+          echo "Unpacked source published to branch: $BRANCH"
 
       - name: Set up Node
         uses: actions/setup-node@v4
