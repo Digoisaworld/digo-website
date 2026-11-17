@@ -32,6 +32,18 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
     setShowPhantomHandoff(false)
 
     try {
+      // A previously selected Phantom adapter can remain selected after leaving the in-app browser.
+      // Re-check its provider state before calling connect from Chrome or another external browser.
+      if (
+        isMobileBrowser &&
+        wallet?.adapter.name === 'Phantom' &&
+        wallet.adapter.readyState === WalletReadyState.NotDetected
+      ) {
+        setError('Phantom connections on mobile work inside Phantom’s in-app browser, not Chrome. Open DIGO in Phantom to continue.')
+        setShowPhantomHandoff(true)
+        return
+      }
+
       if (!wallet) {
         const phantom = wallets.find((item) => item.adapter.name === 'Phantom')
         const phantomNotDetected = !phantom || phantom.adapter.readyState === WalletReadyState.NotDetected
