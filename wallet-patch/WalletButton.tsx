@@ -15,10 +15,6 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
     () => typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent),
     [],
   )
-  const isPhantomInApp = useMemo(
-    () => typeof navigator !== 'undefined' && /Phantom/i.test(navigator.userAgent),
-    [],
-  )
   const phantomBrowseUrl = useMemo(() => {
     if (typeof window === 'undefined') return 'https://phantom.app'
     const target = new URL(window.location.href)
