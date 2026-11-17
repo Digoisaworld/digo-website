@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'digo-site-source.zip'
+      - 'wallet-patch/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
@@ -37,6 +38,12 @@ jobs:
           fi
           PROJECT_DIR="$(dirname "$PACKAGE_JSON")"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+      - name: Apply reviewed wallet integration patch
+        run: |
+          cp wallet-patch/WalletButton.tsx "$PROJECT_DIR/src/components/WalletButton.tsx"
+          cat wallet-patch/wallet-button.css >> "$PROJECT_DIR/src/styles/index.css"
+          echo "Applied Phantom mobile-browser handoff patch."
 
       - name: Package unpacked source for inspection
         run: |
