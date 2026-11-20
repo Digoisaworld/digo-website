@@ -2,6 +2,14 @@
 
 > Community-first Solana token project. This repository is the public home for the DIGO website, its documentation, and deployment workflow.
 
+## Official community links
+
+- Website: https://digoisaworld.github.io/digo-token/
+- GitHub: https://github.com/digoisaworld
+- Token repository: https://github.com/Digoisaworld/digo-token
+- X: https://x.com/Digoaicoin
+- Telegram: https://t.me/Digoisaworld
+
 ## Project overview
 
 DIGO is a community-oriented token on **Solana Mainnet Beta**. The project is focused on community growth, transparent token information, and a planned free-claim experience. The website is intended to let visitors learn about DIGO, connect a Solana wallet such as Phantom, and—once the on-chain claim and swap integrations are implemented and audited—claim or swap tokens through wallet-signed transactions.
@@ -69,7 +77,7 @@ Never expose private keys, seed phrases, RPC credentials with privileged access,
 ## Repository
 
 - Website source repository: [ehsanatashzaban5-hub/digo-website](https://github.com/ehsanatashzaban5-hub/digo-website)
-- Token metadata repository: [ehsanatashzaban5-hub/digo-token](https://github.com/ehsanatashzaban5-hub/digo-token)
+- Token metadata repository: [Digoisaworld/digo-token](https://github.com/Digoisaworld/digo-token)
 - Network: Solana Mainnet Beta
 
 ## Local development
